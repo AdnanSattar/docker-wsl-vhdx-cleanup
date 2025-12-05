@@ -1,0 +1,34 @@
+# Export files
+*.tar
+docker.tar
+docker_desktop_export.tar
+
+# VHDX files (should never be committed)
+*.vhdx
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# PowerShell
+*.ps1xml
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.temp
+~$*
+

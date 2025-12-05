@@ -1,0 +1,12 @@
+# This file ensures the assets directory is tracked by git.
+# 
+# To generate PNG diagrams from the Mermaid sources:
+#
+# 1. Install Mermaid CLI:
+#    npm install -g @mermaid-js/mermaid-cli
+#
+# 2. Generate PNGs:
+#    mmdc -i docs/mermaid-diagram.md -o assets/architecture-diagram.png
+#
+# Alternatively, GitHub automatically renders Mermaid diagrams in Markdown.
+

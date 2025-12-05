@@ -1,0 +1,71 @@
+name: Lint PowerShell Scripts
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'scripts/**/*.ps1'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'scripts/**/*.ps1'
+
+jobs:
+  lint:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install PSScriptAnalyzer
+      shell: pwsh
+      run: |
+        Set-PSRepository PSGallery -InstallationPolicy Trusted
+        Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+
+    - name: Run PSScriptAnalyzer
+      shell: pwsh
+      run: |
+        $results = Invoke-ScriptAnalyzer -Path ./scripts -Recurse -ReportSummary
+        $errors = $results | Where-Object { $_.Severity -eq 'Error' }
+        $warnings = $results | Where-Object { $_.Severity -eq 'Warning' }
+        
+        Write-Host "Found $($errors.Count) errors and $($warnings.Count) warnings"
+        
+        if ($results) {
+            $results | Format-Table -AutoSize
+        }
+        
+        if ($errors.Count -gt 0) {
+            Write-Error "Script analysis found errors. Please fix them before merging."
+            exit 1
+        }
+
+    - name: Verify script syntax
+      shell: pwsh
+      run: |
+        $scripts = Get-ChildItem -Path ./scripts -Filter *.ps1 -Recurse
+        $hasErrors = $false
+        
+        foreach ($script in $scripts) {
+            Write-Host "Checking syntax: $($script.Name)"
+            $errors = $null
+            $null = [System.Management.Automation.PSParser]::Tokenize(
+                (Get-Content $script.FullName -Raw), 
+                [ref]$errors
+            )
+            
+            if ($errors) {
+                Write-Error "Syntax errors in $($script.Name):"
+                $errors | ForEach-Object { Write-Error $_.Message }
+                $hasErrors = $true
+            }
+        }
+        
+        if ($hasErrors) {
+            exit 1
+        }
+        
+        Write-Host "All scripts passed syntax check" -ForegroundColor Green
+
